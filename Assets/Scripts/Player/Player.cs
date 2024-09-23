@@ -1,19 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 public class Player : MonoBehaviour
 {
     // MOVEMENT
     [SerializeField] private float speed = 10f;
     [SerializeField] private float rotationSpeed = 3f; // forward rotate speed
-    [SerializeField] private float gravityStrength = 9.8f;
-    
-    private float radius; // Raggio del movimento circolare
+
+
+    [SerializeField] private float surfaceDistance = 1.5f;  
 
     // PLANET
-    [SerializeField] private Transform planet;
-
+    [SerializeField] private Transform planet; 
 
     // CONTROLLER
     private PlayerController playerController;
@@ -30,68 +31,70 @@ public class Player : MonoBehaviour
         // CONTROLLER
         playerController = GetComponent<PlayerController>();
 
-        // PLANET
-        GameObject planetObject = GameObject.FindGameObjectWithTag("Planet");
-        if (planetObject != null)
-        {
-            planet = planetObject.transform;
-
-        }
-   
-        radius = Vector3.Distance(transform.position, planet.position);
+        rb.useGravity = false;
     }
 
-    // Update is called once per frame
+    
     private void Update()
     {
-        
+
     }
 
     private void FixedUpdate()
-    {
-        ApplyGravity();
+    {       
+        AlignWithPlanetSurface();
         Move();
     }
 
 
     private void Move()
-    {      
+    {
         Vector2 input = playerController.GetMovement();
 
-        
+
         Vector3 movementDirection = (transform.right * input.x) + (transform.forward * input.y);
 
-        // Se c'è input, ruota l'oggetto nella direzione in cui si sta muovendo
-        if (movementDirection.magnitude > 0.1f) // Evita di ruotare se non c'è input
+        // if there is input, rotate the object in the direction it is moving.
+        if (movementDirection.magnitude > 0.1f) // avoid rotating if there is no input
         {
-            
+
             Quaternion targetRotation = Quaternion.LookRotation(movementDirection.normalized, transform.up);
 
-            
+
             rb.rotation = Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
         }
 
-        
+
         Vector3 forwardMovement = transform.forward * speed * Time.fixedDeltaTime;
 
-        
+
         rb.MovePosition(rb.position + forwardMovement);
     }
 
-    private void ApplyGravity()
+
+    private void AlignWithPlanetSurface()
     {
+        Vector3 directionToPlanet = (transform.position - planet.position).normalized;
 
-        Vector3 gravityDirection = (planet.position - transform.position).normalized;
+        // Raycast to find the surface of the planet
+        RaycastHit hit;
+        if (Physics.Raycast(transform.position, -directionToPlanet, out hit))
+        {
+            // Set the player's position slightly above the surface
+            Vector3 targetPosition = hit.point + directionToPlanet * surfaceDistance;
+            rb.MovePosition(targetPosition);
 
-        // Simulates "gravity" by pushing the car toward the center of the planet
-        Vector3 gravityForce = gravityDirection * gravityStrength;
+            // Align the car's up direction with the surface normal
+            Vector3 surfaceNormal = hit.normal;
 
+            // Adjust the car's forward direction to stay parallel with the surface
+            Vector3 forwardAlongSurface = Vector3.Cross(transform.right, surfaceNormal).normalized;
 
-        rb.AddForce(gravityForce, ForceMode.Acceleration);
+            // Create a rotation that aligns the car's up direction with the surface normal
+            // and keeps the car's forward direction parallel to the ground
+            Quaternion targetRotation = Quaternion.LookRotation(forwardAlongSurface, surfaceNormal);
 
-        // Align the machine so that it always "points" perpendicular to the surface
-        Quaternion targetRotation = Quaternion.FromToRotation(transform.up, -gravityDirection) * transform.rotation;
-        rb.rotation = Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+            rb.rotation = Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
+        }
     }
-
 }
