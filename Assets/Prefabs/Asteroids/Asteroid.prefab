@@ -14,9 +14,10 @@ GameObject:
   - component: {fileID: 4661702377777347575}
   - component: {fileID: 8215375028729239331}
   - component: {fileID: 4051957422133020302}
+  - component: {fileID: -4101173389374659809}
   m_Layer: 0
   m_Name: Asteroid
-  m_TagString: Untagged
+  m_TagString: Asteroid
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -146,4 +147,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 870f8f585d6e38141adf2adee49e117a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  fallSpeed: 30
+  fallSpeed: 45
+  damage: 50
+--- !u!114 &-4101173389374659809
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2070625616605017766}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a6f2f07394385f48967dc91273dda46, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  damage: 50

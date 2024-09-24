@@ -16,6 +16,8 @@ public class SpawnManager : MonoBehaviour
     private float spawnTimer;
     private int currentPoolIndex = 0;
 
+    private bool isActive;
+
 
     // LIST
     private List<Asteroid> asteroidsList = new List<Asteroid>();
@@ -28,7 +30,7 @@ public class SpawnManager : MonoBehaviour
     void Start()
     {
         // SET POOL
-        for(int i = 0; i < asteroidsAmount; i++) 
+        for (int i = 0; i < asteroidsAmount; i++)
         {
             Asteroid asteroid = Instantiate(asteroidPrefab);
             asteroid.gameObject.SetActive(false);
@@ -36,7 +38,7 @@ public class SpawnManager : MonoBehaviour
         }
 
         spawnTimer = spawnAsteroidTime;
- 
+
     }
 
     // Update is called once per frame
@@ -44,17 +46,17 @@ public class SpawnManager : MonoBehaviour
     {
         spawnTimer -= Time.deltaTime;
 
-        if (spawnTimer <= 0) 
+        if (spawnTimer <= 0)
         {
             SpawnAsteroids();
             spawnTimer = spawnAsteroidTime;
         }
 
-        for (int i = activeCraters.Count - 1; i >= 0; i--) 
+        for (int i = activeCraters.Count - 1; i >= 0; i--)
         {
             craterTimers[i] -= Time.deltaTime;
 
-            if(craterTimers[i] <= 0) 
+            if (craterTimers[i] <= 0)
             {
                 Destroy(activeCraters[i]);
                 activeCraters.RemoveAt(i);
@@ -65,15 +67,15 @@ public class SpawnManager : MonoBehaviour
 
     }
 
-    private void SpawnAsteroids() 
+    private void SpawnAsteroids()
     {
-        
+
         if (asteroidsList.Count >= asteroidsAmount) return;
 
         // Spawn an asteroid from the pool
         Asteroid asteroid = GetAsteroidFromPool();
 
-        if(asteroid != null) 
+        if (asteroid != null)
         {
             Vector3 spawnPosition = GetRandomSpawnPosition();
             asteroid.transform.position = spawnPosition;
@@ -87,48 +89,63 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    private Asteroid GetAsteroidFromPool() 
+    private Asteroid GetAsteroidFromPool()
     {
-       
-        // Usa un ciclo per trovare l'asteroide inattivo
+        // cycle to find the inactive asteroid
         for (int i = 0; i < asteroidsPool.Count; i++)
         {
-            // Calcola l'indice attuale nel pool
-            int index = (currentPoolIndex + i) % asteroidsPool.Count;
-
-            if (!asteroidsPool[index].gameObject.activeInHierarchy)
+            
+            if (!asteroidsPool[currentPoolIndex].isActive)
             {
-                // Aggiorna l'indice per il prossimo accesso
-                currentPoolIndex = (index + 1) % asteroidsPool.Count;
-                return asteroidsPool[index];
+                //Update index for next access
+                Asteroid asteroid = asteroidsPool[currentPoolIndex];
+                currentPoolIndex = (currentPoolIndex + 1) % asteroidsPool.Count;
+                return asteroid;
             }
+            currentPoolIndex = (currentPoolIndex + 1) % asteroidsPool.Count;
         }
 
-        
         return null;
     }
 
-    private Vector3 GetRandomSpawnPosition() 
+    private Vector3 GetRandomSpawnPosition()
     {
-        
-        Vector3 direction = Random.onUnitSphere * 100f;
+        float spawnDistance = 100f;
+        Vector3 direction = Random.onUnitSphere * spawnDistance;
         return planet.position + direction;
     }
 
-    public void OnAsteroidHit(Asteroid asteroid) 
+
+    public void OnAsteroidHit(Asteroid asteroid, Collision collision)
     {
+        // Position of the asteroid at the time of impact
         Vector3 hitPosition = asteroid.transform.position;
 
-        Quaternion craterRotation = Quaternion.FromToRotation(Vector3.up, (planet.position - hitPosition).normalized);
+        // I use GetContact to get the surface normal
+        Vector3 surfaceNormal = collision.GetContact(0).normal; // I need to get the first contact normal
 
-        
-        GameObject creator = Instantiate(craterPrefab, hitPosition, craterRotation);
-        activeCraters.Add(creator);
-        craterTimers.Add(destroyCreaterTime);          
+        // I use a raycast to get the exact point on the surface
+        RaycastHit hit;
+        if (Physics.Raycast(hitPosition, -surfaceNormal, out hit))
+        {
+            // Impact point on the surface
+            Vector3 craterPosition = hit.point; 
 
-        asteroid.gameObject.SetActive(false);  
-        asteroidsList.Remove(asteroid);
-        asteroidsPool.Add(asteroid);
-        
+            
+            Quaternion craterRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
+            GameObject crater = Instantiate(craterPrefab, craterPosition, craterRotation);
+            activeCraters.Add(crater);
+            craterTimers.Add(destroyCreaterTime);
+
+            // diable asteroid
+            asteroid.gameObject.SetActive(false);
+            asteroid.isActive = false;
+            asteroidsList.Remove(asteroid);
+            asteroidsPool.Add(asteroid);
+        }
+
     }
+
+
+
 }

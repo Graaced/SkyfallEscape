@@ -1,28 +1,29 @@
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.UIElements;
+
 
 public class Player : MonoBehaviour
 {
-    // MOVEMENT
-    [SerializeField] private float speed = 10f;
-    [SerializeField] private float rotationSpeed = 3f; // forward rotate speed
-
-
-    [SerializeField] private float surfaceDistance = 1.5f;  
-
-    // PLANET
-    [SerializeField] private Transform planet; 
-
     // CONTROLLER
     private PlayerController playerController;
 
     // RIGIDBODY
     private Rigidbody rb;
 
-    // Start is called before the first frame update
+    // MOVEMENT
+    [SerializeField] private float speed = 10f;
+    [SerializeField] private float rotationSpeed = 3f; // forward rotate speed
+
+    // PLANET
+    [SerializeField] private Transform planet; 
+    [SerializeField] private float surfaceDistance = 1.5f;
+
+    // HEALTH
+    [SerializeField] private float health = 100f;
+
+
+    
+
+
     private void Start()
     {
         // RB
@@ -47,6 +48,7 @@ public class Player : MonoBehaviour
     }
 
 
+    // MOVEMENT
     private void Move()
     {
         Vector2 input = playerController.GetMovement();
@@ -70,7 +72,6 @@ public class Player : MonoBehaviour
 
         rb.MovePosition(rb.position + forwardMovement);
     }
-
 
     private void AlignWithPlanetSurface()
     {
@@ -97,4 +98,28 @@ public class Player : MonoBehaviour
             rb.rotation = Quaternion.Slerp(rb.rotation, targetRotation, rotationSpeed * Time.fixedDeltaTime);
         }
     }
+
+    // EVENT DAMAGE
+    private void OnEnable()
+    {
+        DamageEvent.OnDamage += TakeDamage;
+    }
+
+    private void OnDisable()
+    {
+        DamageEvent.OnDamage -= TakeDamage;
+    }
+
+    private void TakeDamage(float damage) 
+    {
+        health -= damage;
+        Debug.Log("danno ricevuto : " + damage + ", salute attuale : " + health);
+
+        if(health <= 0) 
+        {
+            Destroy(gameObject);
+        }
+    }
+
 }
+

@@ -5,8 +5,10 @@ using UnityEngine;
 public class Asteroid : MonoBehaviour
 {
     [SerializeField] private float fallSpeed = 25f;
- 
+    [SerializeField] private float damage = 50f;
+
     private Vector3 target;
+    public bool isActive;
 
     // Start is called before the first frame update
     void Start()
@@ -32,7 +34,9 @@ public class Asteroid : MonoBehaviour
         if (collision.gameObject.CompareTag("Planet"))
         {
             // Notify SpawnManager to handle the asteroid hit
-            FindObjectOfType<SpawnManager>().OnAsteroidHit(this);
+            FindObjectOfType<SpawnManager>().OnAsteroidHit(this,collision);
         }
     }
+
+    
 }
