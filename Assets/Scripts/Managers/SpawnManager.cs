@@ -4,21 +4,32 @@ using UnityEngine;
 
 public class SpawnManager : MonoBehaviour
 {
-
-    [SerializeField] private Asteroid asteroidPrefab;
-    [SerializeField] private GameObject craterPrefab;
+    //PLANET
     [SerializeField] private Transform planet;
 
+    // ASTEROID
+    [SerializeField] private Asteroid asteroidPrefab;
+    [SerializeField] private GameObject craterPrefab;
     [SerializeField] private float spawnAsteroidTime = 1.5f;
     [SerializeField] private float destroyCreaterTime = 1.5f;
     [SerializeField] private int asteroidsAmount = 20;
 
     private float spawnTimer;
     private int currentPoolIndex = 0;
-
     private bool isActive;
 
 
+    //ALIEN RAY
+    [SerializeField] private AlienRay rayPrefab;   
+    [SerializeField] private float spawnRayTime = 2f;
+
+    private float spawnRayTimer;
+
+
+    // SCORE
+    [SerializeField] private ScoreManager scoreManager;
+
+ 
     // LIST
     private List<Asteroid> asteroidsList = new List<Asteroid>();
     private List<Asteroid> asteroidsPool = new List<Asteroid>();
@@ -39,54 +50,86 @@ public class SpawnManager : MonoBehaviour
 
         spawnTimer = spawnAsteroidTime;
 
+
+        // ALIEN RAY
+        //spawnRayTimer = spawnRayTime;
     }
 
     // Update is called once per frame
     void Update()
     {
-        spawnTimer -= Time.deltaTime;
 
+        if (GameManager.Instance.isPlayerDead) 
+        {
+            return; 
+        }
+
+        // ASTEROIDS
+        spawnTimer -= Time.deltaTime;
+        
         if (spawnTimer <= 0)
         {
             SpawnAsteroids();
             spawnTimer = spawnAsteroidTime;
         }
 
-        for (int i = activeCraters.Count - 1; i >= 0; i--)
+        if (scoreManager.isShrinking)
         {
-            craterTimers[i] -= Time.deltaTime;
-
-            if (craterTimers[i] <= 0)
+            DestroyCraters();
+        }
+        else 
+        {
+            for (int i = activeCraters.Count - 1; i >= 0; i--)
             {
-                Destroy(activeCraters[i]);
-                activeCraters.RemoveAt(i);
-                craterTimers.RemoveAt(i);
+                craterTimers[i] -= Time.deltaTime;
+
+                if (craterTimers[i] <= 0)
+                {
+                    Destroy(activeCraters[i]);
+                    activeCraters.RemoveAt(i);
+                    craterTimers.RemoveAt(i);
+                }
             }
         }
+
+        // ALIEN RAY
+        //spawnRayTimer -= Time.deltaTime;
+
+        //if (spawnRayTimer <= 0)
+        //{
+        //    SpawnAlienRay();
+        //    spawnRayTimer = spawnRayTime;
+        //}
 
 
     }
 
     private void SpawnAsteroids()
     {
-
+        if (scoreManager.isShrinking) 
+        {
+            return;
+        }
+        
         if (asteroidsList.Count >= asteroidsAmount) return;
 
-        // Spawn an asteroid from the pool
-        Asteroid asteroid = GetAsteroidFromPool();
+       // Spawn an asteroid from the pool
+       Asteroid asteroid = GetAsteroidFromPool();
 
-        if (asteroid != null)
-        {
-            Vector3 spawnPosition = GetRandomSpawnPosition();
-            asteroid.transform.position = spawnPosition;
-
-            float randomSize = Random.Range(1f, 2f);
-            asteroid.transform.localScale = Vector3.one * randomSize;
-
-            asteroid.SetTarget(planet.position);
-            asteroid.gameObject.SetActive(true);
-            asteroidsList.Add(asteroid);
-        }
+       if (asteroid != null)
+       {
+          Vector3 spawnPosition = GetRandomSpawnPosition();
+          asteroid.transform.position = spawnPosition;
+         
+          float randomSize = Random.Range(1f, 2f);
+          asteroid.transform.localScale = Vector3.one * randomSize;
+         
+          asteroid.SetTarget(planet.position);
+          asteroid.gameObject.SetActive(true);
+          asteroidsList.Add(asteroid);
+       }
+       
+        
     }
 
     private Asteroid GetAsteroidFromPool()
@@ -131,7 +174,6 @@ public class SpawnManager : MonoBehaviour
             // Impact point on the surface
             Vector3 craterPosition = hit.point; 
 
-            
             Quaternion craterRotation = Quaternion.FromToRotation(Vector3.up, hit.normal);
             GameObject crater = Instantiate(craterPrefab, craterPosition, craterRotation);
             activeCraters.Add(crater);
@@ -146,6 +188,28 @@ public class SpawnManager : MonoBehaviour
 
     }
 
+    private void SpawnAlienRay() 
+    {
+        if (rayPrefab != null) 
+        {
+            AlienRay alienRay = Instantiate(rayPrefab);
+        }
+
+    }
+
+
+    private void DestroyCraters()
+    {
+        for (int i = activeCraters.Count - 1; i >= 0; i--)
+        {
+            Destroy(activeCraters[i]);
+        }       
+        activeCraters.Clear();
+        craterTimers.Clear();
+    }
+
+
+   
 
 
 }

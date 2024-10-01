@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 
@@ -20,9 +21,10 @@ public class Player : MonoBehaviour
     // HEALTH
     [SerializeField] private float health = 100f;
 
+    // SCORE MANAGER 
+    [SerializeField] private ScoreManager scoreManager;
 
-    
-
+   
 
     private void Start()
     {
@@ -38,7 +40,10 @@ public class Player : MonoBehaviour
     
     private void Update()
     {
-
+        if (health <= 0)
+        {
+            scoreManager.PlayerDied();
+        }
     }
 
     private void FixedUpdate()
@@ -117,9 +122,13 @@ public class Player : MonoBehaviour
 
         if(health <= 0) 
         {
+            scoreManager.PlayerDied();
+            GameManager.Instance.PlayerDied();
             Destroy(gameObject);
         }
     }
 
+
+    
 }
 

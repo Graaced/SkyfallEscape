@@ -4,15 +4,34 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
+    public static GameManager Instance;
+
+    public bool isPlayerDead { get; private set; } // state of the player
+
     // Start is called before the first frame update
-    void Start()
+    private void Awake()
     {
         
+        if (Instance == null)
+        {
+            Instance = this;
+            DontDestroyOnLoad(gameObject); 
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    public void PlayerDied()
     {
+        isPlayerDead = true;
+       
+    }
+
+    public void ResetGame()
+    {
+        isPlayerDead = false;
         
     }
 }
