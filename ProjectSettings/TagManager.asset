@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Planet
   - Asteroid
+  - Camera
   layers:
   - Default
   - TransparentFX

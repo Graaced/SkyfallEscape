@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using System;
 
 public class ScoreManager : MonoBehaviour
 {
@@ -16,18 +17,37 @@ public class ScoreManager : MonoBehaviour
 
     // UI 
     [SerializeField] private TextMeshProUGUI timerText;  // Text UI component reference
+    [SerializeField] private TextMeshProUGUI healthBonusText; // Text UI component reference
+    [SerializeField] private Image questProgressBar;
+    [SerializeField] private Image healthBonus;
+    [SerializeField] private Image bannerText;
+    public GameObject HealthBonusImage => healthBonus.gameObject;
 
     // TIMERS
-    private float scoreTime = 10f;
+    private float scoreTime = 12f;
     private float scoreTimer;
-
     private bool isPlayerDead = false;
+
+    // TIMERS UI 
+    private float bonusDisplayTime = 3f; 
+    private float bonusTimer; 
+    private bool isBonusActive = false; 
+
+    // QUEST 
+    private float survivalTime = 0f; // Tracks how long the player has survived
+    private bool questCompleted = false;  
+    private float questGoalTime = 10f;
+
+    // EVENT
+    public static event Action OnQuestCompleted;
 
     // Start is called before the first frame update
     void Start()
     {
         scoreTimer = scoreTime;
-        
+        healthBonus.gameObject.SetActive(false);
+        healthBonusText.gameObject.SetActive(false);
+        bannerText.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -45,7 +65,19 @@ public class ScoreManager : MonoBehaviour
                 //scoreTimer = scoreTime;
                 ShrinkPlanet();
             }
+
         }
+
+        // Update the player's survival time
+        survivalTime += Time.deltaTime;
+
+        // Check if the quest has been completed
+        if (!questCompleted)
+        {
+            UpdateQuest();
+        }
+
+
 
         // Update the scale gradually if the planet is shrinking
         if (isShrinking)
@@ -58,6 +90,18 @@ public class ScoreManager : MonoBehaviour
                 planet.localScale = targetScale;
                 isShrinking = false;
                 scoreTimer = scoreTime;
+            }
+        }
+
+        if (isBonusActive)
+        {
+            bonusTimer -= Time.deltaTime;
+
+            if (bonusTimer <= 0)
+            {             
+                healthBonusText.gameObject.SetActive(false);
+                bannerText.gameObject.SetActive(false);
+                isBonusActive = false; // Resetta lo stato del bonus
             }
         }
 
@@ -79,6 +123,7 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    //UI
     private void UpdateTimerUI(float time) 
     {
         if(timerText != null) 
@@ -88,8 +133,35 @@ public class ScoreManager : MonoBehaviour
     }
 
 
+    // QUEST
+    private void UpdateQuest()
+    {
+        if (questProgressBar != null)
+        {
+            questProgressBar.fillAmount = survivalTime / questGoalTime;
+
+            if (survivalTime >= questGoalTime)
+            {
+                questProgressBar.fillAmount = 1f;
+                questCompleted = true;
+                healthBonus.gameObject.SetActive(true);
+                bannerText.gameObject.SetActive(true);
+                healthBonusText.gameObject.SetActive(true);
+
+                //Event
+                OnQuestCompleted?.Invoke();
+
+                bonusTimer = bonusDisplayTime;
+                isBonusActive = true; // Imposta lo stato del bonus attivo
+
+            }
+        }
+    }
+
+
     public void PlayerDied()  
     {
         isPlayerDead = true;
     }
+
 }

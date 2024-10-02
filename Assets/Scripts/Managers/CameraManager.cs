@@ -48,20 +48,14 @@ public class CameraManager : MonoBehaviour
         transform.position = Vector3.SmoothDamp(transform.position, targetPosition, ref velocity, followSpeed);
     }
 
-    
     private void AlignCameraWithPlayer()
     {
-        // Function to rotate around the player to give a dynamic effect
+        // Rotate the camera to look at the player
+        Quaternion targetRotation = Quaternion.LookRotation(player.position - transform.position, player.up) * Quaternion.Euler(rotationOffset);
 
-        Quaternion targetRotation = Quaternion.LookRotation(player.forward, player.up) * Quaternion.Euler(rotationOffset);
-
+        // Smoothly rotate the camera to the target rotation
         transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
     }
-
-
-
-
-
 
 
 }

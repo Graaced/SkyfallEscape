@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SpawnManager : MonoBehaviour
 {
@@ -18,24 +19,25 @@ public class SpawnManager : MonoBehaviour
     private int currentPoolIndex = 0;
     private bool isActive;
 
-
-    //ALIEN RAY
-    [SerializeField] private AlienRay rayPrefab;   
-    [SerializeField] private float spawnRayTime = 2f;
-
-    private float spawnRayTimer;
-
-
     // SCORE
     [SerializeField] private ScoreManager scoreManager;
 
- 
+    // UI
+    [SerializeField] private Image questProgressBar;
+
+
     // LIST
     private List<Asteroid> asteroidsList = new List<Asteroid>();
     private List<Asteroid> asteroidsPool = new List<Asteroid>();
 
     private List<GameObject> activeCraters = new List<GameObject>();
     private List<float> craterTimers = new List<float>();
+
+
+    // QUEST
+    [SerializeField] private int objectsToAvoidForQuest = 10; // total by astoerids and crater
+    private int avoidedObjectsCount = 0;
+    private bool questCompleted = false;
 
     // Start is called before the first frame update
     void Start()
@@ -50,9 +52,6 @@ public class SpawnManager : MonoBehaviour
 
         spawnTimer = spawnAsteroidTime;
 
-
-        // ALIEN RAY
-        //spawnRayTimer = spawnRayTime;
     }
 
     // Update is called once per frame
@@ -85,6 +84,7 @@ public class SpawnManager : MonoBehaviour
 
                 if (craterTimers[i] <= 0)
                 {
+                    AvoidCrater();
                     Destroy(activeCraters[i]);
                     activeCraters.RemoveAt(i);
                     craterTimers.RemoveAt(i);
@@ -92,18 +92,12 @@ public class SpawnManager : MonoBehaviour
             }
         }
 
-        // ALIEN RAY
-        //spawnRayTimer -= Time.deltaTime;
-
-        //if (spawnRayTimer <= 0)
-        //{
-        //    SpawnAlienRay();
-        //    spawnRayTimer = spawnRayTime;
-        //}
-
-
     }
 
+
+
+ 
+    // ASTEROID
     private void SpawnAsteroids()
     {
         if (scoreManager.isShrinking) 
@@ -127,9 +121,25 @@ public class SpawnManager : MonoBehaviour
           asteroid.SetTarget(planet.position);
           asteroid.gameObject.SetActive(true);
           asteroidsList.Add(asteroid);
-       }
+
+           AvoidAsteroid();
+        }
        
         
+    }
+  
+    private void AvoidAsteroid()
+    {
+        if (!questCompleted)
+        {
+            avoidedObjectsCount++;
+            UpdateQuest();
+
+            if (avoidedObjectsCount >= objectsToAvoidForQuest)
+            {
+                questCompleted = true;
+            }
+        }
     }
 
     private Asteroid GetAsteroidFromPool()
@@ -159,6 +169,7 @@ public class SpawnManager : MonoBehaviour
     }
 
 
+    // CRATER
     public void OnAsteroidHit(Asteroid asteroid, Collision collision)
     {
         // Position of the asteroid at the time of impact
@@ -187,17 +198,7 @@ public class SpawnManager : MonoBehaviour
         }
 
     }
-
-    private void SpawnAlienRay() 
-    {
-        if (rayPrefab != null) 
-        {
-            AlienRay alienRay = Instantiate(rayPrefab);
-        }
-
-    }
-
-
+  
     private void DestroyCraters()
     {
         for (int i = activeCraters.Count - 1; i >= 0; i--)
@@ -207,7 +208,26 @@ public class SpawnManager : MonoBehaviour
         activeCraters.Clear();
         craterTimers.Clear();
     }
+    private void AvoidCrater()
+    {
+        if (!questCompleted) 
+        {
+            avoidedObjectsCount++;
+            UpdateQuest();
 
+            if(avoidedObjectsCount >= objectsToAvoidForQuest) 
+            {
+                questCompleted = true;
+            }
+        }
+    }
+
+    //QUEST
+    private void UpdateQuest()
+    {
+        float progress = (float)avoidedObjectsCount / objectsToAvoidForQuest;
+        questProgressBar.fillAmount = progress;
+    }
 
    
 

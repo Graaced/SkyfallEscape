@@ -19,7 +19,11 @@ public class Player : MonoBehaviour
     [SerializeField] private float surfaceDistance = 1.5f;
 
     // HEALTH
-    [SerializeField] private float health = 100f;
+    [SerializeField] private float maxhealth = 100f;
+    public float currentHealth = 50f;
+    public float bonusHealth = 50f;
+
+    private float healthBonus = 50f;  // Amount of health to add on quest completion
 
     // SCORE MANAGER 
     [SerializeField] private ScoreManager scoreManager;
@@ -40,7 +44,7 @@ public class Player : MonoBehaviour
     
     private void Update()
     {
-        if (health <= 0)
+        if (currentHealth <= 0)
         {
             scoreManager.PlayerDied();
         }
@@ -108,27 +112,41 @@ public class Player : MonoBehaviour
     private void OnEnable()
     {
         DamageEvent.OnDamage += TakeDamage;
+        ScoreManager.OnQuestCompleted += AddHealthBonus;
     }
 
     private void OnDisable()
     {
         DamageEvent.OnDamage -= TakeDamage;
+        ScoreManager.OnQuestCompleted -= AddHealthBonus;
     }
 
     private void TakeDamage(float damage) 
     {
-        health -= damage;
-        Debug.Log("danno ricevuto : " + damage + ", salute attuale : " + health);
+        currentHealth -= damage;
+        Debug.Log("danno ricevuto : " + damage + ", salute attuale : " + currentHealth);
 
-        if(health <= 0) 
+        if(currentHealth <= 0) 
         {
             scoreManager.PlayerDied();
             GameManager.Instance.PlayerDied();
             Destroy(gameObject);
         }
+        if (currentHealth <= 50f) 
+        {
+            scoreManager.HealthBonusImage.SetActive(false);
+        }
+        
+    }
+
+  
+    private void AddHealthBonus() 
+    {
+        currentHealth += healthBonus;
+        currentHealth = MathF.Min(currentHealth, maxhealth);
+             
     }
 
 
-    
 }
 
