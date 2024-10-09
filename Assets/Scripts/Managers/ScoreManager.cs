@@ -18,9 +18,12 @@ public class ScoreManager : MonoBehaviour
     // UI 
     [SerializeField] private TextMeshProUGUI timerText;  // Text UI component reference
     [SerializeField] private TextMeshProUGUI healthBonusText; // Text UI component reference
+    [SerializeField] private TextMeshProUGUI shrinkText;  
     [SerializeField] private Image questProgressBar;
     [SerializeField] private Image healthBonus;
     [SerializeField] private Image bannerText;
+    [SerializeField] private Image shrinkBanner;
+
     public GameObject HealthBonusImage => healthBonus.gameObject;
 
     // TIMERS
@@ -48,6 +51,8 @@ public class ScoreManager : MonoBehaviour
         healthBonus.gameObject.SetActive(false);
         healthBonusText.gameObject.SetActive(false);
         bannerText.gameObject.SetActive(false);
+        shrinkText.gameObject.SetActive(false);
+        shrinkBanner.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -64,6 +69,9 @@ public class ScoreManager : MonoBehaviour
             {               
                 //scoreTimer = scoreTime;
                 ShrinkPlanet();
+                shrinkBanner.gameObject.SetActive(true);
+                shrinkText.gameObject.SetActive(true);
+
             }
 
         }
@@ -90,6 +98,8 @@ public class ScoreManager : MonoBehaviour
                 planet.localScale = targetScale;
                 isShrinking = false;
                 scoreTimer = scoreTime;
+                shrinkBanner.gameObject.SetActive(false);
+                shrinkText.gameObject.SetActive(false);
             }
         }
 
@@ -164,4 +174,5 @@ public class ScoreManager : MonoBehaviour
         isPlayerDead = true;
     }
 
+    
 }

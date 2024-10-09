@@ -65,33 +65,32 @@ public class SpawnManager : MonoBehaviour
 
         // ASTEROIDS
         spawnTimer -= Time.deltaTime;
-        
-        if (spawnTimer <= 0)
-        {
-            SpawnAsteroids();
-            spawnTimer = spawnAsteroidTime;
-        }
 
-        if (scoreManager.isShrinking)
-        {
-            DestroyCraters();
-        }
-        else 
-        {
-            for (int i = activeCraters.Count - 1; i >= 0; i--)
-            {
-                craterTimers[i] -= Time.deltaTime;
+       if (spawnTimer <= 0)
+       {
+           SpawnAsteroids();
+           spawnTimer = spawnAsteroidTime;
+       }
 
-                if (craterTimers[i] <= 0)
-                {
-                    AvoidCrater();
-                    Destroy(activeCraters[i]);
-                    activeCraters.RemoveAt(i);
-                    craterTimers.RemoveAt(i);
-                }
-            }
-        }
+       if (scoreManager.isShrinking)
+       {
+           DestroyCraters();
+       }
+       else
+       {
+           for (int i = activeCraters.Count - 1; i >= 0; i--)
+           {
+               craterTimers[i] -= Time.deltaTime;
 
+               if (craterTimers[i] <= 0)
+               {
+                   AvoidCrater();
+                   Destroy(activeCraters[i]);
+                   activeCraters.RemoveAt(i);
+                   craterTimers.RemoveAt(i);
+               }
+           }
+       }     
     }
 
 
@@ -104,7 +103,7 @@ public class SpawnManager : MonoBehaviour
         {
             return;
         }
-        
+
         if (asteroidsList.Count >= asteroidsAmount) return;
 
        // Spawn an asteroid from the pool
@@ -122,8 +121,8 @@ public class SpawnManager : MonoBehaviour
           asteroid.gameObject.SetActive(true);
           asteroidsList.Add(asteroid);
 
-           AvoidAsteroid();
-        }
+          // AvoidAsteroid();
+       }
        
         
     }
@@ -175,10 +174,10 @@ public class SpawnManager : MonoBehaviour
         // Position of the asteroid at the time of impact
         Vector3 hitPosition = asteroid.transform.position;
 
-        // I use GetContact to get the surface normal
-        Vector3 surfaceNormal = collision.GetContact(0).normal; // I need to get the first contact normal
+        // use GetContact to get the surface normal
+        Vector3 surfaceNormal = collision.GetContact(0).normal; // need to get the first contact normal
 
-        // I use a raycast to get the exact point on the surface
+        // use a raycast to get the exact point on the surface
         RaycastHit hit;
         if (Physics.Raycast(hitPosition, -surfaceNormal, out hit))
         {
@@ -195,6 +194,8 @@ public class SpawnManager : MonoBehaviour
             asteroid.isActive = false;
             asteroidsList.Remove(asteroid);
             asteroidsPool.Add(asteroid);
+
+            AvoidAsteroid();
         }
 
     }

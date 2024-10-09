@@ -41,7 +41,12 @@ public class CameraManager : MonoBehaviour
 
     private void FollowPlayer()
     {
-        
+
+        if (player == null)
+        {      
+            return; 
+        }
+
         Vector3 targetPosition = player.position + player.TransformDirection(offset);
 
         
@@ -50,6 +55,12 @@ public class CameraManager : MonoBehaviour
 
     private void AlignCameraWithPlayer()
     {
+
+        if (player == null)
+        {            
+            return; 
+        }
+
         // Rotate the camera to look at the player
         Quaternion targetRotation = Quaternion.LookRotation(player.position - transform.position, player.up) * Quaternion.Euler(rotationOffset);
 

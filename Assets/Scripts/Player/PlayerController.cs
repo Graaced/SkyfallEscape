@@ -1,6 +1,6 @@
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour
 {
@@ -21,6 +21,7 @@ public class PlayerController : MonoBehaviour
         moveAction.performed += OnMove;
 
         moveAction.Enable();
+
     }
 
     private void OnDisable()
@@ -29,6 +30,7 @@ public class PlayerController : MonoBehaviour
 
         moveAction.performed -= OnMove;
         moveAction.Disable();
+
     }
 
     public Vector2 GetMovement() 
@@ -40,4 +42,5 @@ public class PlayerController : MonoBehaviour
     {
         Vector2 moveInput = context.ReadValue<Vector2>();
     }
+ 
 }

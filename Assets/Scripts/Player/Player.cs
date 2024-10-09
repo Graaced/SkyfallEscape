@@ -1,5 +1,7 @@
 using System;
+using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 
 public class Player : MonoBehaviour
@@ -28,7 +30,19 @@ public class Player : MonoBehaviour
     // SCORE MANAGER 
     [SerializeField] private ScoreManager scoreManager;
 
-   
+    // UI
+    [SerializeField] private TextMeshProUGUI pressText;
+    [SerializeField] private TextMeshProUGUI spaceText;
+    [SerializeField] private TextMeshProUGUI torestartText;
+    [SerializeField] private TextMeshProUGUI timerText;
+    [SerializeField] private Image questProgressBar;
+    [SerializeField] private Image questProgressBar2;
+    [SerializeField] private Image timerBanner;
+
+
+    // AUDIO
+    [SerializeField] private AudioSource music;
+
 
     private void Start()
     {
@@ -39,6 +53,10 @@ public class Player : MonoBehaviour
         playerController = GetComponent<PlayerController>();
 
         rb.useGravity = false;
+
+        pressText.gameObject.SetActive(false);
+        spaceText.gameObject.SetActive(false);
+        torestartText.gameObject.SetActive(false);
     }
 
     
@@ -131,6 +149,20 @@ public class Player : MonoBehaviour
             scoreManager.PlayerDied();
             GameManager.Instance.PlayerDied();
             Destroy(gameObject);
+
+            // UI
+            pressText.gameObject.SetActive(true);
+            spaceText.gameObject.SetActive(true);
+            torestartText.gameObject.SetActive(true);
+            scoreManager.gameObject.SetActive(false);
+            questProgressBar.gameObject.SetActive(false);
+            questProgressBar2.gameObject.SetActive(false);
+            timerText.gameObject.SetActive(false);
+            timerBanner.gameObject.SetActive(false);
+
+            // AUDIO
+            music.Stop();
+
         }
         if (currentHealth <= 50f) 
         {
@@ -146,7 +178,6 @@ public class Player : MonoBehaviour
         currentHealth = MathF.Min(currentHealth, maxhealth);
              
     }
-
 
 }
 

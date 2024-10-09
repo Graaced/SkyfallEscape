@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+//using System.Numerics;
 using UnityEngine;
 
 public class Asteroid : MonoBehaviour
@@ -21,6 +22,8 @@ public class Asteroid : MonoBehaviour
     {
         Vector3 direction = (target - transform.position).normalized;
         transform.position += direction * fallSpeed * Time.deltaTime;
+
+        transform.rotation = Quaternion.LookRotation(direction);
     }
 
 
