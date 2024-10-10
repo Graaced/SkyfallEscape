@@ -58,6 +58,13 @@ public class ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // to stop the timer when planet reach the minScale
+        if (planet.localScale.x <= minScale)
+        {
+            
+            return;
+        }
+
         if (!isShrinking && !isPlayerDead) 
         {
             scoreTimer -= Time.deltaTime;
@@ -138,7 +145,7 @@ public class ScoreManager : MonoBehaviour
     {
         if(timerText != null) 
         {
-            timerText.text = " D = " + time.ToString("F2");
+            timerText.text = time.ToString("F2"); 
         }
     }
 
